@@ -14,7 +14,7 @@
     "install": "scripts/build.sh",
     "watch": "tsc -p tsconfig.dev.json --watch",
     "lint": "tslint -t verbose src/**/*.ts{,x}",
-    "test": "jest dist"
+    "test": "jest"
   },
   "engines": {
     "node": "node >= 8.0.0"
@@ -55,6 +55,7 @@
   "devDependencies": {
     "jest": "^22.4.3",
     "regenerator-runtime": "^0.11.1",
-    "sinon": "^4.4.9"
+    "sinon": "^4.4.9",
+    "ts-jest": "^23.1.4"
   }
 }

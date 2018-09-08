@@ -31,11 +31,11 @@ export class Site {
     public readonly taskrunner: TaskRunner;
     public readonly globalStore: GlobalStore;
 
-    constructor(siteId: string) {
+    constructor(siteId: string, rootPath?: string) {
 
         this.id = siteId;
 
-        this.config = provideConfig(siteId);
+        this.config = provideConfig(siteId, null, rootPath);
         this.logger = initLogger(this.id);
 
         this.enabled = this.config.get('site.enabled', false);

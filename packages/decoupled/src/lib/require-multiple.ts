@@ -15,9 +15,8 @@ export function requireMultiple(paths) {
         } catch (e) {
             // no-op
         }
-
         return false;
     });
-
+    
     return result;
 }

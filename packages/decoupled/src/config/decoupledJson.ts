@@ -3,14 +3,14 @@ import { get } from 'lodash';
 
 let decoupledJson: object = null;
 
-function loadDecoupledJson() {
+function loadDecoupledJson(rootPath?: string) {
 
     if (decoupledJson) {
         return decoupledJson;
     }
 
     try {
-        decoupledJson = require(resolve('decoupled.json'));
+        decoupledJson = require(resolve(rootPath || '', 'decoupled.json'));
     } catch (e) {
         decoupledJson = null;
     }
@@ -19,9 +19,9 @@ function loadDecoupledJson() {
 
 }
 
-export const hasDecoupledJson = (): boolean => {
+export const hasDecoupledJson = (rootPath?: string): boolean => {
 
-    loadDecoupledJson();
+    loadDecoupledJson(rootPath);
     return decoupledJson !== null;
 
 };

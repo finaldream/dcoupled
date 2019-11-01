@@ -3,4 +3,3 @@
  */
 
 export * from './router';
-export * from './default-routes';

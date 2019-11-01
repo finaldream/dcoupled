@@ -1,0 +1,41 @@
+{
+  "name": "decoupled-data-wordpress",
+  "version": "1.0.0",
+  "description": "Wordpress API data-source for Decoupled",
+  "repository": "https://github.com/finaldream/decoupled",
+  "main": "lib/index.js",
+  "types": "index.d.ts",
+  "engines": {
+    "node": "node >= 8.0.0"
+  },
+  "license": "MIT",
+  "scripts": {
+    "build": "../../scripts/build-package.sh",
+    "watch": "tsc --watch",
+    "lint": "tslint -t verbose src/**/*.ts{,x}",
+    "test": "jest  --passWithNoTests"
+  },
+  "files": [
+    "/lib",
+    "/index.*"
+  ],
+  "dependencies": {
+    "@types/lodash": "^4.14.*",
+    "@types/node": "^12.7.*",
+    "chalk": "^2.4.*",
+    "http-errors": "^1.6.*",
+    "jest": "^24.9.0",
+    "lodash": "4.17.*",
+    "node-fetch": "^2.6.*",
+    "qs": "^6.8.*",
+    "typescript": "^3.6.*"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.*",
+    "ts-jest": "^24.1.0",
+    "decoupled": ">=0.22.0"
+  },
+  "peerDependencies": {
+    "decoupled": ">=0.22.0"
+  }
+}

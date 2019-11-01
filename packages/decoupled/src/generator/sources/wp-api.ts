@@ -5,8 +5,7 @@
 import Chalk from 'chalk';
 import promiseMap from 'promise.map';
 
-import { cachedFetch } from '../../fetch';
-import { Router, DefaultRoutes } from '../../router';
+import { Router } from '../../router';
 import { removeTrailingSlash, ServerRequest } from '../../lib';
 import { ServerResponse } from 'http';
 import { Site } from '../../site/site';
@@ -37,7 +36,7 @@ class WpApi extends SiteDependent {
         }
 
         const router = new Router(this.site);
-        router.addRoutes(DefaultRoutes);
+        router.addRoutes([]);
 
         // iterate each post & language
         const states = {};
@@ -67,9 +66,7 @@ class WpApi extends SiteDependent {
     }
 
     public async fetchList() {
-        const list = await cachedFetch(this.site, { type: 'list', params: {} });
-
-        return list.posts || [];
+        return [];
     }
 }
 

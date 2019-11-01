@@ -10,7 +10,7 @@ import { Renderer } from '../renderer';
 import { Cache } from '../cache/cache';
 import { TaskRunner } from '../services/task-runner';
 import { GlobalStore } from '../services/global-store';
-import { cachedFetch } from '../fetch';
+import { fetch } from '../fetch/fetch';
 import SiteServer from './site-server';
 import { appPath } from '../lib';
 import { initLogger } from '../logger';
@@ -18,6 +18,7 @@ import { Logger } from 'decoupled-logger';
 import { registerRedirects } from '../redirects/redirect-store';
 import { PluginManager } from '../services/plugin-manager';
 import { BackendNotify } from '../services/backend-notify';
+import { RequestInit, Response } from 'node-fetch';
 
 export class Site {
 
@@ -75,13 +76,8 @@ export class Site {
         return this.config.get('site.domain');
     }
 
-    /**
-     * Wrapper for cachedFetch()
-     *
-     * @TODO: generalize and simplify, get rid of type...
-     */
-    public cachedFetch(params): object {
-        return cachedFetch(this, params);
+    public fetch(url: string, init?: RequestInit): Promise<Response> {
+        return fetch(this, url, init);
     }
 
     public connect(): any {
@@ -97,7 +93,7 @@ export class Site {
         const routes: Route[] = this.config.get('router.routes', []).map((route) => new Route(route));
 
         const router = new Router(this);
-        router.addRoutesWithDefaults(routes);
+        router.addRoutes(routes);
 
         return router;
     }

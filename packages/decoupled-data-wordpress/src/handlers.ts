@@ -1,32 +1,27 @@
-/**
- * Define default routes
- */
-
 import { get } from 'lodash';
+import { directFetch , cachedFetch} from './lib';
+import { Site, ServerRequest, genAPICacheKey, DelayedQueue, delayedCacheInvalidate } from 'decoupled';
 
-import apiFetch from '../fetch/api-fetch';
-import { DelayedQueue } from '../lib/delayed-queue';
-import { genAPICacheKey } from '../lib';
-import { ServerRequest } from '../server';
-import { Route } from './route';
-import { Site } from '../site/site';
-import { delayedCacheInvalidate } from '../cache/delayed-cache-invalidate';
-
-// Keeps an invalidation-queue per site
 const invalidationQueues: Map<Site, DelayedQueue> = new Map();
 
-const handleMenus = async (site: Site) => {
-    const result = await site.cachedFetch({
-        params: {
-            lang: 'all',
-        },
-        type: 'menus',
-    });
+export const handleMenus = async (site: Site) => {
 
+    site.logger.debug('[WP-API]', 'handleMenus invoked');
+
+    const params = {
+        lang: 'all',
+    };
+    const type = 'menus';
+
+    const result = await cachedFetch(site, { type, params });
+    
     return Object.assign({}, result);
 };
 
-const handleRouteWithSlug = async (site: Site, req: ServerRequest) => {
+export const handleRouteWithSlug = async (site: Site, req: ServerRequest) => {
+
+    site.logger.debug('[WP-API]', 'handleRouteWithSlug invoked');
+
     let slug = req.params._ || req.url;
 
     // only send the URL, get rid of the query-part
@@ -37,13 +32,16 @@ const handleRouteWithSlug = async (site: Site, req: ServerRequest) => {
     const params = { q: slug, ...queries };
 
     if (queries.preview) {
-        return apiFetch(site, { type, params });
+        return await directFetch(site, { type, params });
     }
 
-    return site.cachedFetch({ type, params });
+    return await cachedFetch(site, { type, params });
 };
 
-const handleCacheInvalidate = async (site: Site, req: ServerRequest) => {
+export const handleCacheInvalidate = async (site: Site, req: ServerRequest) => {
+    
+    site.logger.debug('[WP-API]', 'handleCacheInvalidate invoked');
+
     const data = (req.body && req.body.cache) ? req.body.cache : false;
     const invalidator = site.config.get('cache.invalidator', false);
 
@@ -92,33 +90,16 @@ const handleCacheInvalidate = async (site: Site, req: ServerRequest) => {
 
             break;
     }
+
     return { status: 'ok' };
 };
 
-const handlePreviewRequest = async (site: Site, req: ServerRequest) => {
+export const handlePreviewRequest = async (site: Site, req: ServerRequest) => {
+
+    site.logger.debug('[WP-API]', 'handlePreviewRequest invoked');
 
     const type = 'preview';
     const params = req.query || {};
-
-    return apiFetch(site, { type, params });
+       
+    return await directFetch(site, { type, params });
 };
-
-export const DefaultRoutes = [
-    new Route({
-        handler: [handleMenus, handlePreviewRequest],
-        method: 'GET',
-        route: '/preview(/)',
-    }),
-    new Route({
-        handler: handleCacheInvalidate,
-        method: 'POST',
-        route: '/cache(/)',
-        docType: '',
-        render: (site, { state }) => JSON.stringify(state),
-    }),
-    new Route({
-        handler: [handleMenus, handleRouteWithSlug],
-        method: 'GET',
-        route: '(*)',
-    }),
-];

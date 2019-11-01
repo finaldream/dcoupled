@@ -10,7 +10,6 @@ import { validateHttpMethod } from '../lib';
 import { ServerRequest } from '../server/server-request';
 import { ServerResponse } from '../server/server-response';
 import { collectRoutes } from './collect-routes';
-import { DefaultRoutes } from './default-routes';
 import HttpError from './http-error';
 import { Route } from './route';
 import { ResponseData } from './response-data';
@@ -55,7 +54,7 @@ export class Router extends SiteDependent {
     public addRoutesWithDefaults(routes: Route[]) {
 
         this.addRoutes(
-            collectRoutes(DefaultRoutes, routes),
+            collectRoutes([], routes),
         );
 
     }

@@ -4,7 +4,7 @@
 
 import { SiteDependent } from '../lib/common/site-dependent';
 import { Site } from '../site/site';
-import fetch from 'node-fetch';
+import { fetch } from '../fetch/fetch';
 
 export class BackendNotify extends SiteDependent {
 
@@ -68,24 +68,13 @@ export class BackendNotify extends SiteDependent {
 
     private async postMessage(body: string) {
         const headers = { 'Content-Type': 'application/json' };
-        // TODO: unify fetch-function with api-fetch.ts https://finaldream.atlassian.net/browse/DC-36
-        const authentication = this.site.config.get('services.wpapi.authentication');
-        if (authentication) {
-            if (authentication.username && authentication.password) {
-                const encoded = new Buffer(`${authentication.username}:${authentication.password}`).toString('base64');
-                Object.assign(headers, { Authorization: `Basic ${encoded}` });
-            }
-            if (authentication.token) {
-                Object.assign(headers, { 'decoupled-token': authentication.token });
-            }
-        }
-        const res = await fetch(this.notifyEndpoint, {
+        const res = await fetch(this.site, this.notifyEndpoint, {
             method: 'post',
             body,
             headers
         });
         if (!res.ok) {
-            throw new Error(res.status);
+            throw new Error(String(res.status));
         }
         return res;
     }

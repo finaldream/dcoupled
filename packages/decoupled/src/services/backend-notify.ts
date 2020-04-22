@@ -26,6 +26,7 @@ export class BackendNotify extends SiteDependent {
         }
 
         this.notifyEndpoint = `${site.config.get('services.wpapi.endpoint')}${notifyPath}`;
+        this.logger.info('Intialized BACKEND NOTIFY service');
         this.logger.debug('[BACKEND NOTIFY] intialized with endpoint:', this.notifyEndpoint);
 
     }
@@ -48,6 +49,7 @@ export class BackendNotify extends SiteDependent {
         const body = this.prepareMessage(message, senderTags);
         try {
             await this.postMessage(body);
+            this.logger.info('[BACKEND NOTIFY] message sent');
             this.logger.debug('[BACKEND NOTIFY] message succesfully sent:', message);
             this.logger.silly('[BACKEND NOTIFY] ...with the following tags:', senderTags);
             return true;

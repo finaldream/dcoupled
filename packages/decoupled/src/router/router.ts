@@ -136,4 +136,8 @@ export class Router extends SiteDependent {
             state,
         };
     }
+
+    public destroy() {
+        this.routes = {};
+    }
 }

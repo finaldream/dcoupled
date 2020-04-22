@@ -18,7 +18,7 @@ export default async (site: Site, { type, params }) => {
 
     if (authentication) {
         if (authentication.username && authentication.password) {
-            const encoded = new Buffer(`${authentication.username}:${authentication.password}`).toString('base64');
+            const encoded = Buffer.from(`${authentication.username}:${authentication.password}`).toString('base64');
             Object.assign(headers, { Authorization: `Basic ${encoded}` });
         }
         if (authentication.token) {

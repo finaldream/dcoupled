@@ -9,5 +9,5 @@ import qs from 'qs';
 export function genAPICacheKey(type, params = {}) {
     const plain = `${type}/${qs.stringify(params, { encode: false })}`;
 
-    return new Buffer(plain).toString('base64');
+    return Buffer.from(plain).toString('base64');
 }

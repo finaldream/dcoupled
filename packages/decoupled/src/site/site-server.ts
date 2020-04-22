@@ -39,7 +39,7 @@ export default class SiteServer extends SiteDependent {
 
         // Set up static file locations
         this.staticFiles.forEach(({ uri, path: dir, ...options }) => {
-            this.logger.info('Serving static files from:', dir);
+            this.logger.debug('Serving static files from:', dir);
 
             this.app.use(uri, express.static(path.resolve(dir), options));
         });
@@ -203,5 +203,9 @@ export default class SiteServer extends SiteDependent {
         } catch (err) {
             await this.handleError(response, err, new ResponseData());
         }
+    }
+
+    public destroy() {
+        this.app.stack = [];
     }
 }

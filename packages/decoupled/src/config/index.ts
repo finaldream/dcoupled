@@ -1,4 +1,4 @@
 export * from './config';
 export * from './decoupled-config';
-export * from './get-site-ids';
-export * from './provide-config';
+export * from '../lib/get-site-ids';
+export * from './provide-config-bundle';

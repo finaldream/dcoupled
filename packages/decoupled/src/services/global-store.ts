@@ -10,7 +10,7 @@ export class GlobalStore extends EventEmitter {
 
     constructor() {
         super();
-        this.state = {};
+        this.clear();
     }
 
     public setState(newState = {}) {
@@ -24,6 +24,10 @@ export class GlobalStore extends EventEmitter {
 
     public onChange(handler) {
         this.on('change', handler);
+    }
+
+    public clear() {
+        this.state = {};
     }
 
 }

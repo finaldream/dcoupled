@@ -1,35 +1,42 @@
-import { resolve } from 'path';
-import { get } from 'lodash';
+import { resolve, join } from 'path';
+import { configFromFiles } from './provide-config-file';
+import { Config } from '.';
 
-let decoupledConfig: object = null;
+let decoupledConfig: Config;
 
-const DEFAULT_CONFIG = {
-    appPath: resolve('.decoupled'),
-    srcDir: resolve('.'),
-};
-
-function loadDecoupledConfig() {
+function ensureConfig(): Config | undefined {
 
     if (!decoupledConfig) {
         try {
-            decoupledConfig = require(resolve('decoupled.config'));
+            decoupledConfig = configFromFiles([
+                join(__dirname, 'default-decoupled-config.js'),
+                resolve('decoupled.config')
+            ])
         } catch (e) {
-            decoupledConfig = null;
+            console.error(e)
+            decoupledConfig = undefined;
         }
     }
 
-    return { ...DEFAULT_CONFIG, ...decoupledConfig };
+    return decoupledConfig;
 }
 
 export const hasDecoupledConfig = (): boolean => {
-    loadDecoupledConfig();
+    ensureConfig();
     return decoupledConfig !== null;
 };
 
 export const getFromDecoupledConfig = (keyPath: string, defaultValue: any = null): any => {
-    return get(
-        loadDecoupledConfig(),
-        keyPath,
-        defaultValue,
-    );
+
+    if (!hasDecoupledConfig()) {
+        return defaultValue
+    }
+
+    const config = ensureConfig()
+
+    if (!config) {
+        throw new Error(`Decoupled Config not available. (${keyPath})`)
+    }
+
+    return config.get(keyPath, defaultValue);
 };

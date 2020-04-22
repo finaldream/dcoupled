@@ -3,10 +3,10 @@ import { getFromDecoupledConfig } from '../config';
 
 let basePath: string;
 
-export const appPath = (...paths: string[]): string => {
+export const srcDir = (...paths: string[]): string => {
 
     if (!basePath) {
-        basePath = getFromDecoupledConfig('appPath');
+        basePath = getFromDecoupledConfig('srcDir');
     }
 
     return join(basePath, ...paths);

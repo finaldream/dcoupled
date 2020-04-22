@@ -38,13 +38,14 @@ export class TaskRunner extends SiteDependent {
                     (task) =>
                         task.handler && typeof task.handler === 'function' &&
                         task.interval && typeof task.interval === 'string',
-            )
+                )
                 .forEach((task) => this.register(task.interval, () => task.handler(this.site), task.startup));
 
-            this.logger.info(`TaskRunner.init Registered ${this.registedTasks.length} tasks`);
+            this.logger.debug(`TaskRunner.init Registered ${this.registedTasks.length} tasks`);
         } else {
-            this.logger.info(`TaskRunner.init No tasks found`);
+            this.logger.debug(`TaskRunner.init No tasks found`);
         }
+
     }
 
     /**
@@ -65,14 +66,10 @@ export class TaskRunner extends SiteDependent {
             const newTask = new cron.CronJob({
                 cronTime,
                 onTick,
-                start,
+                start: true,
+                runOnInit: startup,
                 timeZone,
             });
-
-            // Run task immediately after server start-up
-            if (startup) {
-                onTick();
-            }
 
             this.registedTasks.push(newTask);
 
@@ -102,5 +99,14 @@ export class TaskRunner extends SiteDependent {
         this.registedTasks
             .filter((task) => task.running)
             .forEach((task) => task.stop());
+    }
+
+    public clearTasks() {
+        this.stopAll();
+        this.registedTasks = [];
+    }
+
+    public destroy() {
+        this.clearTasks();
     }
 }

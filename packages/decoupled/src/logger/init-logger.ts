@@ -1,4 +1,4 @@
-import { provideConfig, hasDecoupledConfig } from '../config';
+import { hasDecoupledConfig, getFromDecoupledConfig } from '../config';
 import { Logger, logFormat } from 'decoupled-logger';
 import { isTestEnvironment } from '../lib/is-test-environment';
 
@@ -15,8 +15,7 @@ export function initLogger(siteId: string, env?: string) {
     // skip errors when running in non-project environments (i.e. tests)
     if (hasDecoupledConfig() && !isTestEnvironment()) {
         try {
-            const config = provideConfig(siteId, env);
-            logging = config.get('logging', defaultOptions);
+            logging = getFromDecoupledConfig('logging', defaultOptions);
         } catch (e) {
             console.error('Can not load default config.');
         }

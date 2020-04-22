@@ -41,12 +41,12 @@ export class Cache extends SiteDependent implements CacheInterface {
     }
 
     private init() {
-        this.logger.info('Initialize cache configuration');
+        this.logger.debug('Initialize cache configuration');
 
         // TODO: plug out
         const redis = this.site.config.get('cache.redis', false);
 
-        this.logger.info(`Using ${chalk.yellow((redis) ? 'REDIS' : 'NODE-CACHE')} as caching service.`);
+        this.logger.debug(`Using ${chalk.yellow((redis) ? 'REDIS' : 'NODE-CACHE')} as caching service.`);
 
         // TODO: remove hard-wired cache-provider
         this.cache = (redis) ? new RedisCache(this.site) : new NodeCache(this.site);

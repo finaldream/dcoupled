@@ -6,8 +6,7 @@
 
 import dotenv from 'dotenv';
 import caporal from 'caporal';
-import { join } from 'path';
-import { serveCommand, serveStaticCommand, generateCommand } from './commands';
+import { serveCommand, serveStaticCommand, generateCommand, watchCommand } from './commands';
 import packageJson from '../package.json';
 import { hasDecoupledConfig } from './config';
 
@@ -27,5 +26,6 @@ if (!hasDecoupledConfig()) {
 generateCommand(app);
 serveCommand(app);
 serveStaticCommand(app);
+watchCommand(app);
 
 app.parse(process.argv);

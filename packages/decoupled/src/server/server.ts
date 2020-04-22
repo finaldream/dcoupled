@@ -3,63 +3,116 @@
  */
 
 import express from 'express';
-import vhost from 'vhost';
+import Chalk from 'chalk';
 
-import { appPath } from '../lib';
+import { appPath, srcDir, getHostName } from '../lib';
 import { logger } from '../logger';
 
 import { Site } from '../site/site';
 import { getSiteIDs } from '../config';
 import { redirectsMiddleware } from '../server/middleware/redirects';
 
+import { defaultBundleManager, BundleManagerMode, BundleManager, BundleFileInfo } from '../bundles'
+import { resolve } from 'path';
+
 export class Server {
 
     public environment: string;
-    public app: any;
+    public app: express.Express;
     public sites: Site[] = [];
+    public port: number;
+    public host: string;
+    public bundleMode: BundleManagerMode = 'build';
+    private isConnected: boolean = false;
 
     constructor(environment) {
         this.environment = environment;
         this.app = express();
     }
 
-    public init() {
+    getSiteIds(includeDefault: boolean = false) {
+        return getSiteIDs(this.getContextPath(), includeDefault);
+    }
 
-        const siteIds = getSiteIDs(appPath('sites'));
+    public getContextPath(): string {
+        return srcDir('sites');
+    }
+
+    public init() {
 
         // register redirect middleware before any site-server
         this.app.use(redirectsMiddleware(logger));
 
-        for (const siteId of siteIds) {
+        defaultBundleManager.mode = this.bundleMode
+        defaultBundleManager.bundleDirectory = resolve(appPath())
+        defaultBundleManager.addBundles(this.getSiteIds(true));
+        defaultBundleManager.on(BundleManager.BUNDLES_LOADED, this.handleBundlesLoaded)
+        defaultBundleManager.process()
+
+    }
+
+    handleBundlesLoaded = (bundles: BundleFileInfo[]) => {
+
+        if (!this.isConnected) {
+            this.initSites()
+            this.listen()
+
+            return;
+
+        }
+
+        this.sites.forEach(site => site.reload())
+
+    }
+
+    public vhost = (req, res, next) => {
+
+        const hostname = getHostName(req, true);
+
+        const site = this.sites.find(site => site.domains.includes(hostname));
+        const app: any = site.server.app;
+
+        console.log('vhost', hostname, site.id)
+
+        if (app) {
+            app(req, res, next);
+        } else {
+            return next()
+        }
+
+    }
+
+    private initSites() {
+        logger.info('Server: Initialize Sites');
+        for (const siteId of this.getSiteIds()) {
             const site = new Site(siteId);
 
             if (!site.enabled) {
                 continue;
             }
 
-            const host = site.config.get('site.domain'); // TODO: domain should be called host
+            site.connect();
 
             this.sites.push(site);
-            this.app.use(vhost(host, site.connect()));
+            this.app.use(this.vhost);
         }
-
     }
-    /**
-     * Start the server
-     */
-    public listen(port: number, host: string) {
 
-        this.app.listen(port, host, () => {
-            logger.log('info', `Server listening on http://${host}:${port}`);
+    private listen() {
 
-            const maybePort = port !== 80 ? `:${port}` : '';
+        this.app.listen(this.port, this.host, () => {
+
+            this.isConnected = true;
+
+            logger.log('info', Chalk.green(`Server listening on http://${this.host}:${this.port}`));
+
+            const maybePort = this.port !== 80 ? `:${this.port}` : '';
 
             for (const site of this.sites) {
-                logger.log('info', `${site.id} on http://${site.host}${maybePort}`);
+                site.logger.info(Chalk.green(`Listening on http://${site.host}${maybePort}`));
             }
 
         });
     }
-
 
 }

@@ -51,4 +51,8 @@ export class Config {
         this.config = configs;
     }
 
+    public destroy() {
+        this.config = {};
+    }
+
 }

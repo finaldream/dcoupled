@@ -6,6 +6,7 @@
 import { join } from 'path';
 import { getSiteIDs } from '../config';
 import { logger } from '../logger';
+import { asciiBanner } from '../lib/ascii-banner';
 
 let sitesCache = null;
 export const sites = () => sitesCache ? sitesCache : sitesCache = getSiteIDs() && sitesCache;
@@ -37,7 +38,7 @@ export async function prepareAction(args, options) {
     //     throw new Error(`Unknown site "${opts.site}"`);
     // }
 
-    logger.info(`Using environment "${opts.env}"`);
+    logger.info(asciiBanner(opts.env));
 
     return opts;
 }

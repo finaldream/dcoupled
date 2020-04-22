@@ -10,18 +10,36 @@ import { getSitePath } from '../lib/get-site-path';
 import { getFromDecoupledConfig } from './decoupled-config';
 
 const configCache = new Map();
+
+const readConfigFromFiles = (files: string[]): AnyObject => {
+
+    const result = {}
+
+    files.forEach((file) => {
+        try {
+            merge(result, (require(file) || {})); // eslint-disable-line
+        } catch (error) {
+            console.error(file, error);
+            throw new Error('Can not load config files');
+        }
+    });
+
+    return result
+
+}
+
 /**
  * Read any config file match input pattern
  */
-function readConfigFromFiles(configDir: string, pattern: RegExp): AnyObject {
-
-    const result = {};
+function readConfigFromDir(configDir: string, env: string): AnyObject {
 
     if (!fs.statSync(configDir).isDirectory()) {
         throw new Error(`${configDir} is not a directory`);
     }
 
+    const pattern = getFilePattern(env);
     const files = fs.readdirSync(configDir);
+    const filteredFiles = []
 
     files.forEach((file) => {
 
@@ -30,17 +48,12 @@ function readConfigFromFiles(configDir: string, pattern: RegExp): AnyObject {
             const filePath = path.join(configDir, file);
 
             if (fs.statSync(filePath).isFile()) {
-                try {
-                    merge(result, (require(filePath) || {})); // eslint-disable-line
-                } catch (error) {
-                    console.error(filePath, error);
-                    throw new Error('Can not load config files');
-                }
+                filteredFiles.push(filePath);
             }
         }
     });
 
-    return result;
+    return readConfigFromFiles(filteredFiles);
 }
 
 const filePatterns = {};
@@ -64,14 +77,13 @@ function getFilePattern(env: string = 'default'): RegExp {
  */
 function loadConfig(configPath: string, env: string): AnyObject {
 
-    const defaultConfig = readConfigFromFiles(configPath, getFilePattern());
+    const defaultConfig = readConfigFromDir(configPath, env);
 
     if (!env) {
         return defaultConfig;
     }
 
-    const pattern = getFilePattern(env);
-    const envConfig = readConfigFromFiles(configPath, pattern);
+    const envConfig = readConfigFromDir(configPath, env);
 
     return merge(defaultConfig, envConfig);
 }
@@ -108,6 +120,27 @@ export function provideConfig(siteId: string, environment?: string): Config {
     const config = new Config(merge({}, ...configs));
     configCache[cacheKey] = config;
 
+    console.log(
+        'Configs',
+        paths,
+        config,
+    )
+
     return config;
+
+}
+
+export function configFromPaths(paths: string[], environment?: string): Config {
+
+    const env = environment || process.env.NODE_ENV;
+    const configs = paths.map((p) => loadConfig(p, env));
+    const config = new Config(merge({}, ...configs));
+    return config;
+
+}
+
+export function configFromFiles(filePaths: string[]): Config {
+
+    return new Config(readConfigFromFiles(filePaths));
 
 }

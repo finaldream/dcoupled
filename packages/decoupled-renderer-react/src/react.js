@@ -13,13 +13,15 @@ module.exports = async (site, store = {}) => {
 
     const { views, entryFile } = site.config.get('render');
 
-    const templateFile = `${views}/${entryFile || 'index.js'}`;
-    const templatePath = resolve(templateFile);
-    site.logger.debug('React rendering template', templatePath);
+    const viewsModule = site.bundle.views;
+
+    if (typeof viewsModule !== 'function') {
+        site.logger.error('React renderer: views module is not a function');
+    }
 
     let result;
     try {
-        const Component = require(templatePath).default; // eslint-disable-line
+        const Component = viewsModule.default; // eslint-disable-line
         result = ReactDOMServer.renderToStaticMarkup(React.createElement(Component, store));
     } catch (e) {
         site.logger.error(packageJson.name, e);

@@ -20,6 +20,7 @@ import { PluginManager } from '../services/plugin-manager';
 import { BackendNotify } from '../services/backend-notify';
 import { Bundle } from '../bundles/bundle';
 import { defaultBundleManager } from '../bundles';
+import { ConfigProvider } from '../config/config-provider';
 
 export class Site {
 
@@ -42,8 +43,10 @@ export class Site {
 
         this.id = siteId;
 
-        this.config = provideConfigFromBundle(siteId);
         this.logger = initLogger(this.id);
+
+        const configProvider = new ConfigProvider();
+        this.config = configProvider.loadFromBundle(siteId);
 
         this.enabled = this.config.get('site.enabled', false);
         // TODO: remove in favour of bundles
